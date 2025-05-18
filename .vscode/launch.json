@@ -1,0 +1,19 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "🧩 Debug Extension",
+			"type": "extensionHost",
+			"request": "launch",
+			"args": [
+				"--disable-extensions",
+				"--extensionDevelopmentKind=node",
+				"--extensionDevelopmentPath=${workspaceFolder}",
+				"${workspaceFolder}/test/fixtures"
+			],
+			"outFiles": ["${workspaceFolder}/dist/**/*.js"],
+			"preLaunchTask": "bun: dev",
+			"sourceMapRenames": true
+		}
+	]
+}
