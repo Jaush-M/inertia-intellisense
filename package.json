@@ -2,7 +2,7 @@
 	"name": "inertia-intellisense",
 	"displayName": "Inertia IntelliSense",
 	"description": "Fork of Visual Studio Code extension for Inertia.js",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"repository": "https://github.com/jaush-m/inertia-intellisense",
 	"publisher": "jaush-m",
 	"categories": ["Other"],
@@ -79,6 +79,11 @@
 								"pagesDir": "pages"
 							}
 						]
+					},
+					"inertia.fallbackPath": {
+						"type": "string",
+						"default": "resources/js/pages/**/*.{tsx,jsx,vue}",
+						"description": "Glob pattern used to resolve components when no matches are found in any configured component group."
 					},
 					"inertia.pathSeparators": {
 						"type": "array",

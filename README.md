@@ -96,6 +96,7 @@ resources/js/
 | `inertia.defaultDomain` | Domain to use when not specified explicitly | `"main"` |
 | `inertia.domainSeparator` | The separator between domain and component path<br>***Must match your Inertia setup*** | `"::"` |
 | `inertia.domainDelimiters` | Array of delimiters used to wrap domain names in component strings | `[{start: "[", end: "]"}]` |
+| `inertia.fallbackPath` | Fallback Path if no domains are found | `"resources/js/pages/**/*.{tsx,jsx,vue}"` |
 | `inertia.pathSeparators` | Symbols that separate path segments within components | `["."]` |
 | `inertia.defaultExtension` | File extension for new components<br>*Adapt for React (.tsx), Vue (.vue), etc.* | `".tsx"` |
 

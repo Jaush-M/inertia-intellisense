@@ -1,3 +1,4 @@
+import { unglob } from "@/helpers";
 import {
 	CompletionItem,
 	CompletionItemKind,
@@ -49,12 +50,19 @@ export class AutocompletionProvider implements CompletionItemProvider {
 
 		const componentGroups = workspace
 			.getConfiguration("inertia")
-			.get<any[]>("componentGroups", []);
-		const defaultDomain: string =
-			workspace.getConfiguration("inertia").get("defaultDomain") || "main";
-		const pathSeparators: string[] = workspace
+			.get<{ glob: string; domainDir: string; pagesDir: string }[]>(
+				"componentGroups",
+				[],
+			);
+		const fallbackPath = workspace
 			.getConfiguration("inertia")
-			.get("pathSeparators") || ["."];
+			.get<string>("fallbackPath", "resources/js/pages/**/*.{tsx,jsx,vue}");
+		const defaultDomain = workspace
+			.getConfiguration("inertia")
+			.get<string>("defaultDomain", "main");
+		const pathSeparators = workspace
+			.getConfiguration("inertia")
+			.get<string[]>("pathSeparators", ["."]);
 		const firstPathSeparator = pathSeparators[0];
 
 		const domainSeparator = workspace
@@ -115,6 +123,36 @@ export class AutocompletionProvider implements CompletionItemProvider {
 					item.sortText = `!000_${relativeComponentPath}`;
 					completionItems.push(item);
 				}
+			}
+		}
+
+		if (completionItems.length === 0) {
+			const files = await workspace.findFiles({
+				base: workspaceURI.toString(),
+				baseUri: workspaceURI,
+				pattern: fallbackPath,
+			});
+
+			const fallbackRootRelative = unglob(fallbackPath);
+			const fallbackRootAbsolute = workspaceURI.with({
+				path: `${workspaceURI.path}/${fallbackRootRelative}`,
+			}).fsPath;
+
+			for (const fileUri of files) {
+				const fullPath = fileUri.fsPath;
+
+				if (!fullPath.startsWith(fallbackRootAbsolute)) continue;
+
+				const relativePath = fullPath
+					.slice(fallbackRootAbsolute.length)
+					.replace(/^[/\\]/, "")
+					.replace(/\.[^/.]+$/, "")
+					.replace(/\\|\/+/g, firstPathSeparator);
+
+				const item = new CompletionItem(relativePath, CompletionItemKind.Value);
+				item.detail = "Inertia.js Page";
+				item.sortText = `!001_${relativePath}`;
+				completionItems.push(item);
 			}
 		}
 

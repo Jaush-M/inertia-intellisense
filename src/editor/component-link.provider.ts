@@ -163,25 +163,27 @@ export class ComponentLinkProvider implements DocumentLinkProvider {
 			if (resolvedUri) break;
 		}
 
-		// If not found, fallback to default path in first componentGroup
-		if (!resolvedUri && componentGroups.length > 0) {
-			const firstGroup = componentGroups[0];
-			const rootMatch = firstGroup.glob.match(/^(.*?)\*/);
-			const rootFolder = rootMatch ? rootMatch[1] : unglob(firstGroup.glob);
-			const domainPath = firstGroup.domainDir
-				? path.posix.join(
-						rootFolder,
-						domainSegment,
-						firstGroup.pagesDir,
-						normalizedComponent + defaultExt,
-					)
-				: path.posix.join(
-						rootFolder,
-						firstGroup.pagesDir,
-						normalizedComponent + defaultExt,
-					);
+		if (!resolvedUri) {
+			const fallbackPath = workspace
+				.getConfiguration("inertia")
+				.get<string>("fallbackPath", "resources/js/pages/**/*.{tsx,jsx,vue}");
+			const fallbackGlobRoot = unglob(fallbackPath);
 
-			resolvedUri = Uri.joinPath(workspaceURI, domainPath);
+			const fallbackFiles = await workspace.findFiles(fallbackPath);
+			const fallbackNormalized = normalizedComponent + defaultExt;
+			const fallbackCandidatePath = path.posix.join(
+				fallbackGlobRoot,
+				fallbackNormalized,
+			);
+
+			resolvedUri = fallbackFiles.find((file) =>
+				file.path.includes(fallbackCandidatePath),
+			);
+
+			// If the file doesn't exist, point to where it would be
+			if (!resolvedUri) {
+				resolvedUri = Uri.joinPath(workspaceURI, fallbackCandidatePath);
+			}
 		}
 
 		link.target = resolvedUri;
