@@ -4,23 +4,20 @@ Route::inertia('event', 'Some/Page');
 
 Inertia::render('Help');
 
-inertia('Help');
-
-
 Route::get('/', fn() => inertia('admin::dashboard'))->name('dashboard');
 Route::get('/', fn() => inertia('[admin]::dashboard'))->name('dashboard');
-Route::get('/', fn() => inertia('(admin)::dashboard'))->name('dashboard');
-Route::get('/', fn() => inertia('<admin>::dashboard'))->name('dashboard');
-Route::get('/', fn() => inertia('{admin}::dashboard'))->name('dashboard');
 
-Route::get('/', fn() => inertia('main::dashboard'))->name('dashboard');
-Route::get('/', fn() => inertia('[main]::dashboard'))->name('dashboard');
-Route::get('/', fn() => inertia('(main)::dashboard'))->name('dashboard');
-Route::get('/', fn() => inertia('<main>::dashboard'))->name('dashboard');
-Route::get('/', fn() => inertia('{main}::dashboard'))->name('dashboard');
+inertia('Help');
 
-Route::get('/', fn() => inertia('settings::dashboard'))->name('dashboard');
-Route::get('/', fn() => inertia('[settings]::dashboard'))->name('dashboard');
-Route::get('/', fn() => inertia('(settings)::dashboard'))->name('dashboard');
-Route::get('/', fn() => inertia('<settings>::dashboard'))->name('dashboard');
-Route::get('/', fn() => inertia('{settings}::dashboard'))->name('dashboard');
+inertia('dashboard');
+inertia('main::dashboard');
+inertia('(main)::dashboard');
+
+inertia('admin::dashboard');
+inertia('[admin]::dashboard');
+inertia('(admin)::dashboard');
+
+inertia('[admin]::settings.roles.index');
+inertia('[admin]::settings/roles/index');
+
+inertia('');
