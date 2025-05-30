@@ -77,25 +77,27 @@ resources/js/
 ├── domains/
 │   ├── admin/
 │   │   └── pages/
-│   │       ├── dashboard.tsx    // admin::dashboard
-│   │       └── users.tsx        // admin::users
+│   │       ├── dashboard.tsx    // [admin]::dashboard
+│   │       └── users.tsx        // [admin]::users
 │   ├── user/
 │   │   └── pages/
-│   │       ├── profile.tsx      // user::profile
-│   │       └── settings.tsx     // user::settings
+│   │       ├── profile.tsx      // [user]::profile
+│   │       └── settings.tsx     // [user]::settings
 │   └── main/
 │   │   └── pages/
-│   │       └── welcome.tsx      // welcome or main::welcome
+│   │       └── welcome.tsx      // welcome or [main]::welcome
 │
 ```
 
-### Additional Settings
+### ⚙️ Additional Settings
 
-| Setting                    | Purpose                             | Default  |
-| -------------------------- | ----------------------------------- | -------- |
-| `inertia.defaultDomain`    | Domain to use when not specified    | `"main"` |
-| `inertia.pathSeparators`   | Symbols that separate path segments | `["."]`  |
-| `inertia.defaultExtension` | File extension for new components   | `".tsx"` |
+| ⚙️ Setting | 📝 Purpose | 🔧 Default |
+|------------|------------|------------|
+| `inertia.defaultDomain` | Domain to use when not specified explicitly | `"main"` |
+| `inertia.domainSeparator` | The separator between domain and component path<br>***Must match your Inertia setup*** | `"::"` |
+| `inertia.domainDelimiters` | Array of delimiters used to wrap domain names in component strings | `[{start: "[", end: "]"}]` |
+| `inertia.pathSeparators` | Symbols that separate path segments within components | `["."]` |
+| `inertia.defaultExtension` | File extension for new components<br>*Adapt for React (.tsx), Vue (.vue), etc.* | `".tsx"` |
 
 ## 🔍 Usage Examples
 
@@ -103,7 +105,7 @@ resources/js/
 
 ```php
 // Clickable link + autocompletion for:
-return Inertia::render('Admin::Dashboard', [
+return Inertia::render('[Admin]::Dashboard', [
     'stats' => $dashboardStats,
 ]);
 ```
@@ -129,28 +131,11 @@ createInertiaApp({
 
 ## 🔄 Component Resolution Examples
 
-| Component Name     | Resolves To                                      |
-| ------------------ | ------------------------------------------------ |
-| `admin::dashboard` | `resources/js/domains/admin/pages/dashboard.tsx` |
-| `user::profile`    | `resources/js/domains/user/pages/profile.tsx`    |
-| `welcome`          | `resources/js/domains/main/pages/welcome.tsx`    |
-
-## 🧰 Development
-
-```bash
-# Build
-bun build --format cjs --outdir dist --external vscode src/extension.ts
-
-# Watch during development
-bun build --watch --format cjs --outdir dist --external vscode src/extension.ts
-
-# Package
-vsce package --out inertia.vsix
-
-# Publish
-vsce publish --packagePath inertia.vsix   # VS Code Marketplace
-ovsx publish inertia.vsix                 # Open VSX Registry
-```
+| Component Name       | Resolves To                                      |
+| -------------------- | ------------------------------------------------ |
+| `[admin]::dashboard` | `resources/js/domains/admin/pages/dashboard.tsx` |
+| `[user]::profile`    | `resources/js/domains/user/pages/profile.tsx`    |
+| `welcome`            | `resources/js/domains/main/pages/welcome.tsx`    |
 
 ## License
 
