@@ -75,14 +75,45 @@ export class ComponentLinkProvider implements DocumentLinkProvider {
 		const defaultDomain = workspace
 			.getConfiguration("inertia")
 			.get("defaultDomain", "main");
+		const domainSeparator = workspace
+			.getConfiguration("inertia")
+			.get("domainSeparator", "::");
+		const domainDelimiters = workspace
+			.getConfiguration("inertia")
+			.get<{ start: string; end: string }[]>("domainDelimiters", [
+				{ start: "[", end: "]" },
+				{ start: "<", end: ">" },
+				{ start: "{", end: "}" },
+				{ start: "(", end: ")" },
+			]);
 
 		// Parse domain and component from input string, e.g. [domain]::component.path
 		let domainSegment = defaultDomain;
 		let componentSegment = input;
-		const domainMatch = input.match(/^\[([^\]]+)\]::(.+)$/);
-		if (domainMatch) {
-			domainSegment = domainMatch[1];
-			componentSegment = domainMatch[2];
+
+		let matched = false;
+
+		for (const { start, end } of domainDelimiters) {
+			const escapedStart = start.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
+			const escapedEnd = end.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
+			const regex = new RegExp(
+				`^${escapedStart}([^${escapedEnd}]+)${escapedEnd}${domainSeparator}(.+)$`,
+			);
+			const match = input.match(regex);
+
+			if (match) {
+				domainSegment = match[1];
+				componentSegment = match[2];
+				matched = true;
+				break;
+			}
+		}
+
+		// Handle bare domain formats
+		if (!matched && input.includes(domainSeparator)) {
+			const [rawDomain, ...rest] = input.split(domainSeparator);
+			domainSegment = rawDomain;
+			componentSegment = rest.join(domainSeparator);
 		}
 
 		const normalizedComponent = componentSegment.replaceAll(

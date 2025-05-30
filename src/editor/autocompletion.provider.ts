@@ -14,19 +14,35 @@ export class AutocompletionProvider implements CompletionItemProvider {
 		document: TextDocument,
 		position: Position,
 	): Promise<CompletionItem[] | CompletionList<CompletionItem> | undefined> {
+		const lineText = document.lineAt(position.line).text;
+		const cursorIndex = position.character;
+
+		// Quick check: cursor must be inside a quoted string
+		const textBeforeCursor = lineText.slice(0, cursorIndex);
+		const textAfterCursor = lineText.slice(cursorIndex);
+
+		const quoteBefore = textBeforeCursor.lastIndexOf("'");
+		const doubleQuoteBefore = textBeforeCursor.lastIndexOf('"');
+		const quoteAfter = textAfterCursor.indexOf("'");
+		const doubleQuoteAfter = textAfterCursor.indexOf('"');
+
+		const insideSingleQuotes =
+			quoteBefore > -1 && quoteAfter > -1 && quoteBefore > doubleQuoteBefore;
+		const insideDoubleQuotes =
+			doubleQuoteBefore > -1 &&
+			doubleQuoteAfter > -1 &&
+			doubleQuoteBefore > quoteBefore;
+
+		if (!insideSingleQuotes && !insideDoubleQuotes) return undefined;
+
+		// Check for Inertia context on the line
 		const lineContentUpToCursor = document.getText(
 			new Range(position.line, 0, position.line, position.character),
 		);
-
-		const renderRegex = /\b(Inertia::render|inertia)\([\s\s]*["']$/;
-		const routeRegex = /Route::inertia\([\s\S]*(['"]).+\1[\s\S]*,[\s\S]*['"]$/;
-
-		if (
-			!renderRegex.test(lineContentUpToCursor) &&
-			!routeRegex.test(lineContentUpToCursor)
-		) {
-			return undefined;
-		}
+		const isInInertiaCall = /\b(Inertia::render|inertia|Route::inertia)\(/.test(
+			lineContentUpToCursor,
+		);
+		if (!isInInertiaCall) return undefined;
 
 		const workspaceURI = workspace.getWorkspaceFolder(document.uri)?.uri;
 		if (!workspaceURI) return [];
@@ -40,6 +56,13 @@ export class AutocompletionProvider implements CompletionItemProvider {
 			.getConfiguration("inertia")
 			.get("pathSeparators") || ["."];
 		const firstPathSeparator = pathSeparators[0];
+
+		const domainSeparator = workspace
+			.getConfiguration("inertia")
+			.get("domainSeparator", "::");
+		const domainDelimiters: { start: string; end: string }[] = workspace
+			.getConfiguration("inertia")
+			.get("domainDelimiters", [{ start: "[", end: "]" }]);
 
 		const completionItems: CompletionItem[] = [];
 
@@ -63,7 +86,6 @@ export class AutocompletionProvider implements CompletionItemProvider {
 				if (!match) continue;
 
 				const domainSegment = domainDir ? match[1] : defaultDomain;
-
 				const domainPrefix = domainDir
 					? `${domainDir}/${domainSegment}/${pagesDir}`
 					: pagesDir;
@@ -76,18 +98,23 @@ export class AutocompletionProvider implements CompletionItemProvider {
 					.replace(/\.[^/.]+$/, "")
 					.replace(/\\|\/+/g, firstPathSeparator);
 
-				// For domain-less setups, omit domain prefix
-				const componentLabel =
-					domainDir && domainSegment !== defaultDomain
-						? `[${domainSegment}]::${relativeComponentPath}`
-						: relativeComponentPath;
-
-				const item = new CompletionItem(
-					componentLabel,
-					CompletionItemKind.Value,
-				);
-				item.detail = "Inertia.js page";
-				completionItems.push(item);
+				if (domainDir && domainSegment !== defaultDomain) {
+					for (const delimiter of domainDelimiters) {
+						const label = `${delimiter.start}${domainSegment}${delimiter.end}${domainSeparator}${relativeComponentPath}`;
+						const item = new CompletionItem(label, CompletionItemKind.Value);
+						item.detail = "Inertia.js Page";
+						item.sortText = `!000_${domainSegment}${relativeComponentPath}`;
+						completionItems.push(item);
+					}
+				} else {
+					const item = new CompletionItem(
+						relativeComponentPath,
+						CompletionItemKind.Value,
+					);
+					item.detail = "Inertia.js Page";
+					item.sortText = `!000_${relativeComponentPath}`;
+					completionItems.push(item);
+				}
 			}
 		}
 

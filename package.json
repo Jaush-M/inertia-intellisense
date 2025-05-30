@@ -2,7 +2,7 @@
 	"name": "inertia-intellisense",
 	"displayName": "Inertia IntelliSense",
 	"description": "Fork of Visual Studio Code extension for Inertia.js",
-	"version": "0.0.5",
+	"version": "0.1.0",
 	"repository": "https://github.com/jaush-m/inertia-intellisense",
 	"publisher": "jaush-m",
 	"categories": ["Other"],
@@ -26,6 +26,30 @@
 						"type": "string",
 						"default": "main",
 						"description": "Default domain for component resolution. This setting only affects how the extension resolves the component paths and autocompletion, and you must ensure that your Inertia setup handles them as well."
+					},
+					"inertia.domainSeparator": {
+						"type": "string",
+						"default": "::",
+						"description": "The separator used to define the domain in component names. This setting only affects how the extension resolves the component paths and autocompletion, and you must ensure that your Inertia setup handles them as well."
+					},
+					"inertia.domainDelimiters": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"start": {
+									"type": "string",
+									"description": "Opening delimiter for domain declaration (e.g., '[')"
+								},
+								"end": {
+									"type": "string",
+									"description": "Closing delimiter for domain declaration (e.g., ']')"
+								}
+							},
+							"required": ["start", "end"]
+						},
+						"default": [{ "start": "[", "end": "]" }],
+						"description": "The allowed domain delimiters for component names. This setting only affects how the extension resolves the component paths and autocompletion, and you must ensure that your Inertia setup handles them as well."
 					},
 					"inertia.componentGroups": {
 						"type": "array",
